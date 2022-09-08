@@ -1,12 +1,16 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
+
 import "@avvy/contracts/ContractRegistryInterface.sol";
 import "@avvy/contracts/RainbowTableInterface.sol";
 import "@avvy/contracts/ResolverInterface.sol";
+import "@avvy/contracts/ReverseResolverAuthenticatorInterface.sol";
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 
-contract NameResolver is ResolverInterface {
+contract NameResolver is ResolverInterface, ReverseResolverAuthenticatorInterface {
   IERC721 _nft;
   ContractRegistryInterface _contractRegistry;
 
@@ -14,6 +18,11 @@ contract NameResolver is ResolverInterface {
   mapping(address => uint256) ownersReverse;
   mapping(uint256 => mapping(uint256 => string)) standardEntries;
   mapping(uint256 => mapping(string => string)) entries;
+
+  constructor(IERC721 nft, ContractRegistryInterface contractRegistry) {
+    _nft = nft;
+    _contractRegistry = contractRegistry;
+  }
 
   function _verifyOwner(address owner) internal view {
     require(_nft.balanceOf(owner) > 0, "Must be owner");
@@ -32,6 +41,13 @@ contract NameResolver is ResolverInterface {
 
     We allow any holder of the NFT to claim a single name for their
     wallet address. Names are represented by their hash.
+
+    For example, if a user claims myname.nftproject.avax then
+    myname.nftproject.avax will forward resolve into the sender's
+    0x address.
+
+    ** This does not enable reverse resolution (i.e. going from 
+       0x address to .avax address).
   */
   function claimName(uint256[] memory preimage, uint256 name) external {
     
@@ -118,8 +134,17 @@ contract NameResolver is ResolverInterface {
   
   function resolve(uint256 datasetId, uint256 hash, string memory key) external returns (string memory data) {}
 
-  constructor(IERC721 nft, ContractRegistryInterface contractRegistry) {
-    _nft = nft;
-    _contractRegistry = contractRegistry;
+  /*
+    Reverse Resolution Methods
+    ==========================
+
+    canWrite() is an override for ReverseResolverAuthenticatorInterface.
+    This method is used when setting the reverse record for a name.
+    The reverse record is used when transforming an 0x address into 
+    a .avax name,for use-cases such as displaying the .avax name in the UI when a 
+    user connects to a dapp.
+  */
+  function canWrite(uint256 name, uint256[] memory /* path */, address sender) external view returns (bool) {
+    return owners[name] == sender;
   }
 }

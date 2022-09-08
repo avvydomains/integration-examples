@@ -39,6 +39,10 @@ describe("NameResolver", () => {
     contracts.rainbowTable = await RainbowTable.deploy(contracts.registry.address)
     await contracts.rainbowTable.deployed()
     await contracts.registry.set('RainbowTable', contracts.rainbowTable.address)
+
+    const ReverseResolverRegistry = await ethers.getContractFactory('ReverseResolverRegistryV1')
+    contracts.reverseResolverRegistry = await ReverseResolverRegistry.deploy(contracts.registry.address)
+    await contracts.registry.set('ReverseResolverRegistry', contracts.reverseResolverRegistry.address)
     /*
       End Avvy mock contracts
     */
@@ -125,6 +129,17 @@ describe("NameResolver", () => {
       await contracts.nameResolver.claimName(inputs.a_sigs, inputs.a_hash)
       await contracts.nft['safeTransferFrom(address,address,uint256)'](signers[0].address, signers[1].address, 1)
       await expect(contracts.nameResolver.resolveStandard(1, inputs.a_hash, 3)).to.be.reverted
+    })
+  })
+
+  describe('canWrite', () => {
+    it('should succeed if user owns nft and has claimed name', async () => {
+      await contracts.nft.mint()
+      await contracts.nameResolver.claimName(inputs.a_sigs, inputs.a_hash)
+    })
+
+    it('should fail if user does not own nft', async () => {
+      await expect(contracts.nameResolver.claimName(inputs.a_sigs, inputs.a_hash)).to.be.reverted
     })
   })
 })
