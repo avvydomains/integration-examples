@@ -15,3 +15,4 @@ As an example, consider the NFT project `MyNFTProject`:
 3. If that user transfers all of their MyNFTProject NFTs out of their wallet, `myawesomename.mynftproject.avax` will no longer work.
 
 
+**Disclaimer: This code has not been audited by security professionals. Use at your own risk.**
