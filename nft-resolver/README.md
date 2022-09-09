@@ -14,9 +14,9 @@ As an example, consider the NFT project `MyNFTProject`:
 2. Users with one or more MyNFTProject NFTs in their wallet can register a name like `myawesomename.mynftproject.avax` (replacing `myawesomename` with whatever they want). When they register, `myawesomename.mynftproject.avax will point to their wallet address.
 3. If that user transfers all of their MyNFTProject NFTs out of their wallet, `myawesomename.mynftproject.avax` will no longer work.
 
+## Disclaimer
 
-
-## Disclaimer: This code has not been audited by security professionals. Use at your own risk.
+This code has not been audited by security professionals. Use at your own risk.
 
 ## Development
 
