@@ -83,6 +83,34 @@ contract NameResolver is ResolverInterface, ReverseResolverAuthenticatorInterfac
   }
 
   /*
+    Get Name
+    ========
+
+    ** This is custom functionality. Other resolver implementations 
+       do not need to follow this.
+
+    This simply returns the name that a user has claimed on the resolver.
+  */
+  function getName(address addy) external view returns (uint256 name) {
+    name = ownersReverse[addy];
+    require(name != 0, "Address has not claimed name");
+    _verifyOwner(addy);
+  }
+
+  /*
+    Is Owned
+    ========
+
+    ** This is custom functionality. Other resolver implementations 
+       do not need to follow this.
+
+    This simply checks to see if the given name has been registered.
+  */
+  function isOwned(uint256 name) external view returns (bool) {
+    return owners[name] != address(0);
+  }
+
+  /*
     Clear
     =====
 

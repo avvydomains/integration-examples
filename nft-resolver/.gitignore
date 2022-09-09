@@ -12,3 +12,8 @@ artifacts
 *.swp
 *.swo
 env.sh
+.parcel-cache
+deployments
+
+frontend/contracts.json
+frontend/dist

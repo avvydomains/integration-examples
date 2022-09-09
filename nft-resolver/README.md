@@ -15,3 +15,16 @@ As an example, consider the NFT project Super Ape Not Okay Moon Club (SANOMC):
 3. If that user transfers all of their SANOMC NFTs out of their wallet, `myawesomename.sanomc.avax` will no longer work.
 
 
+## Development
+
+### Environment Variables
+
+`DEVELOPER_PRIVATE_KEY`: A private key to deploy the project.
+
+`DEVELOPER_PUBLIC_KEY`: A public key which gets funded during dev setup.
+
+1. `npm install`
+2. `npx hardhat node` to start a node
+3. `npx hardhat deploy --network localhost --export-all frontend/contracts.json` deploys contracts and exports ABI
+4. `npx hardhat run --network localhost scripts/init-dev.js` initializes the mock contracts & funds dev wallet
+5. `(cd frontend && npx parcel index.html)` starts the frontend bundler

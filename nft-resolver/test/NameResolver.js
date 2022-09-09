@@ -111,6 +111,40 @@ describe("NameResolver", () => {
     })
   })
 
+  describe('getName', () => {
+    it('should return the name if one has been claimed', async () => {
+      await contracts.nft.mint()
+      await contracts.nameResolver.claimName(inputs.a_sigs, inputs.a_hash)
+      const name = await contracts.nameResolver.getName(signers[0].address)
+      expect(name.toString()).to.equal(inputs.a_hash)
+    })
+
+    it('should fail if name has not been claimed', async () => {
+      await expect(contracts.nameResolver.getName(signers[0].address)).to.be.reverted
+    })
+
+    it('should fail if user no longer has nft', async () => {
+      await contracts.nft.mint()
+      await contracts.nameResolver.claimName(inputs.a_sigs, inputs.a_hash)
+      await contracts.nft['safeTransferFrom(address,address,uint256)'](signers[0].address, signers[1].address, 1)
+      await expect(contracts.nameResolver.getName(signers[0].address)).to.be.reverted
+    })
+  })
+
+  describe('isOwned', () => {
+    it('should return true if the name is owned', async () => {
+      await contracts.nft.mint()
+      await contracts.nameResolver.claimName(inputs.a_sigs, inputs.a_hash)
+      const output = await contracts.nameResolver.isOwned(inputs.a_hash)
+      expect(output).to.be.true
+    })
+
+    it('should return false if the name is not owned', async () => {
+      const output = await contracts.nameResolver.isOwned(inputs.a_hash)
+      expect(output).to.be.false
+    })
+  })
+
   describe('resolveStandard', () => {
     it('should fail if name is not found', async () => {
       const output = await contracts.nameResolver.resolveStandard(1, inputs.a_hash, 3)
