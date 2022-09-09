@@ -26,6 +26,8 @@ As an example, consider the NFT project `MyNFTProject`:
 
 `DEVELOPER_PUBLIC_KEY`: A public key which gets funded during dev setup.
 
+### Setup
+
 1. `npm install`
 2. `npx hardhat node` to start a node
 3. `npx hardhat deploy --network localhost --export-all frontend/contracts.json` deploys contracts and exports ABI
