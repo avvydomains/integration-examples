@@ -22,9 +22,8 @@ This code has not been audited by security professionals. Use at your own risk.
 
 ### Environment Variables
 
-`DEVELOPER_PRIVATE_KEY`: A private key to deploy the project.
-
-`DEVELOPER_PUBLIC_KEY`: A public key which gets funded during dev setup.
+- `DEVELOPER_PRIVATE_KEY`: A private key to deploy the project.
+- `DEVELOPER_PUBLIC_KEY`: A public key which gets funded during dev setup.
 
 ### Setup
 
@@ -34,3 +33,26 @@ This code has not been audited by security professionals. Use at your own risk.
 4. `npx hardhat run --network localhost scripts/init-dev.js` initializes the mock contracts & funds dev wallet
 5. `(cd frontend && npx parcel index.html)` starts the frontend bundler
 
+## Deployment
+
+### Environment Variables
+
+- `DEVELOPER_PRIVATE_KEY`: A private key to deploy the contracts. Your domain must be held in this wallet for the setup scripts to work. You can transfer the domain to a different wallet afterwards.
+- `NFT_CONTRACT_ADDRESS`: Address of the ERC721 contract to use with the resolver.
+- `REGISTRY_DOMAIN_NAME`: The .avax name that you are using for the registry. For example, `nftreg.avax`.
+
+### Instructions
+
+#### Mock NFT Setup
+
+Optionally, you can deploy our mock NFT by running `npx hardhat deploy --tags NFT --network mainnet`. After you are finished, copy the contract address and set it in the `NFT_CONTRACT_ADDRESS` environment variable.
+
+If you have an existing ERC721 NFT that you want to set configure, simply set the `NFT_CONTRACT_ADDRESS` environment variable to reference that NFT.
+
+#### Deployment
+
+Make sure you have set up the environment variables properly.
+
+1. `npm install`
+2. `npx hardhat deploy --tags NameResolver --network mainnet --export-all frontend/contracts.json` to deploy the resolver to mainnet
+3. `npx hardhat run --network mainnet scripts/init-mainnet.js` configures your registry domain name. In order for this to work, you must hold the domain name in the wallet identified by `DEVELOPER_PRIVATE_KEY`.

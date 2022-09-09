@@ -1,3 +1,4 @@
+const hre = require('hardhat')
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy } = deployments
@@ -6,7 +7,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   await deploy('NFT', {
     from: deployer,
     log: true,
-    args: ['AvvyRegistryNFT', 'AvvyRegistryNFT']
+    args: ['NFTReg', 'NFTReg']
   })
 }
 module.exports.tags = ['NFT']

@@ -26,7 +26,8 @@ class App extends React.PureComponent {
       chainId: null,
       name: null,
       nextName: '',
-      loading: false
+      loading: false,
+      isMain: false,
     }
   }
 
@@ -47,7 +48,7 @@ class App extends React.PureComponent {
 
     if (accounts.length > 0) {
       this.provider = new ethers.providers.Web3Provider(window.ethereum)
-      this.avvy = new AVVY(this.provider)
+      this.avvy = new AVVY(this.provider.getSigner())
       const { chainId } = await this.provider.getNetwork()
       this.setState({
         account: accounts[0],
@@ -55,9 +56,11 @@ class App extends React.PureComponent {
       }, async () => {
         const hasToken = await this.hasToken()
         const name = await this.getName()
+        const isMain = await this.isMain()
         this.setState({
           hasToken,
           name,
+          isMain
         })
       })
     }
@@ -72,7 +75,7 @@ class App extends React.PureComponent {
 
       if (this._isMainnet()) {
         // use library with simplified lookup on mainnet
-        preimage = await this.avvy.hash(hash).lookup()
+        preimage = (await this.avvy.hash(hash).lookup()).name
       } else {
         // otherwise we use the internal functions to access our mock rainbowtable
         let rainbowTable = await this._getContract('RainbowTableV1')
@@ -94,15 +97,29 @@ class App extends React.PureComponent {
     return parseInt(balance.toString()) > 0
   }
 
-  getToken = async () => {
-    // helps the user get an NFT (in this case, just directly mints it)
+  isMain = async () => {
+    if (this.state.chainId !== 43114) return false // we only support this on mainnet
+    const outputs = await this.avvy.contracts.EVMReverseResolverV1.get(this.state.account)
+    const preimage = this.state.nextName + '.' + REGISTRY_NAME
+    const hash = await this.avvy.utils.nameHash(preimage)
+    return outputs.hash.toString() === hash.toString()
   }
 
   mintToken = async () => {
-    const contract = this._getContract('NFT')
-    const tx = await contract.mint()
-    const receipt = await tx.wait()
-    await this.connectWallet()
+    this.setState({
+      loading: true
+    })
+    try {
+      const contract = this._getContract('NFT')
+      const tx = await contract.mint()
+      const receipt = await tx.wait()
+      await this.connectWallet()
+    } catch (err) {
+    } finally {
+      this.setState({
+        loading: false
+      })
+    }
   }
 
   onNextNameChanged = (e) => {
@@ -139,19 +156,21 @@ class App extends React.PureComponent {
     this.setState({
       loading: true
     })
+    const hash = await this.avvy.utils.nameHash(REGISTRY_NAME)
     const preimage = this.state.nextName + '.' + REGISTRY_NAME
-    const hash = await this.avvy.utils.nameHash(preimage)
+    const inputSignals = await this.avvy.utils.encodeNameHashInputSignals(preimage)
+    const path = inputSignals.slice(4)
     try {
       let tx
       if (this._isMainnet()) {
         
         // this is the live mainnet version
-        tx = await this.avvy.contracts.EVMReverseResolverV1.set(hash, [])
+        tx = await this.avvy.contracts.EVMReverseResolverV1.set(hash, path)
       } else {
 
         // this is our local mock version
         let evmReverseResolver = await this._getContract('EVMReverseResolverV1')
-        tx = await evmReverseResolver.set(hash, [])
+        tx = await evmReverseResolver.set(hash, path)
       }
 
       await tx.wait()
@@ -191,7 +210,9 @@ class App extends React.PureComponent {
               <div className='mt-4'>
                 <div className='font-bold'>{'Set as Main Avvy Name'}</div>
                 <div className=''>{'If you would like to use ' + this.state.name + ' as your Main Avvy Name, enable using the button below. Your Main Avvy Name can be used as your username wherever you connect your wallet.'}</div>
-                <Button onClick={this.setMain} className='mt-2'>{'Set as main'}</Button>
+                {this.state.isMain ? (
+                  <div><span className='font-bold'>{this.state.name}</span> is configured as your Main Avvy Name!</div>
+                ) : <Button onClick={this.setMain} className='mt-2'>{'Set as main'}</Button>}
               </div>
             ) : null}
           </div>
