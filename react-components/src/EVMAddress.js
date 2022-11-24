@@ -8,7 +8,13 @@ class EVMAddress extends React.PureComponent {
   constructor(props) {
     super(props)
     this.state = {
+      
+      // this does nothing in the current component,
+      // but could be used to display a loading spinner.
       loading: false,
+      
+      // this is the .avax name that we will attempt to
+      // find.
       reverse: null
     }
   }
@@ -26,7 +32,6 @@ class EVMAddress extends React.PureComponent {
     try {
       const hash = await avvy.reverse(AVVY.RECORDS.EVM, this.props.address)
       const name = await hash.lookup()
-      console.log('got it ! ')
       this.setState({
         reverse: name.name,
         loading: false
