@@ -1,0 +1,50 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "@avvy/contracts/ContractRegistryInterface.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity ^0.8.0;\n\ninterface ContractRegistryInterface {\n  function get(string memory contractName) external view returns (address);\n}\n"
+    },
+    "@avvy/contracts/reverse-resolvers/EVMReverseResolverInterface.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity ^0.8.0;\n\ninterface EVMReverseResolverInterface {\n  function get(address target) external view returns (uint256 name, uint256 hash);\n  function set(uint256 name, uint256[] calldata path) external;\n}\n"
+    },
+    "@avvy/contracts/ReverseResolverAuthenticatorInterface.sol": {
+      "content": "\n// SPDX-License-Identifier: UNLICENSED\n\npragma solidity ^0.8.0;\n\ninterface ReverseResolverAuthenticatorInterface {\n  function canWrite(uint256 name, uint256[] memory path, address sender) external view returns (bool);\n}\n"
+    },
+    "@avvy/contracts/ReverseResolverRegistryInterface.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity ^0.8.0;\n\ninterface ReverseResolverRegistryInterface {\n  function getResolver(uint256 standardKey) external view returns (address resolverAddress);\n}\n"
+    },
+    "contracts/ReverseResolvableContract.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity ^0.8.0;\n\nimport \"@avvy/contracts/ContractRegistryInterface.sol\";\nimport \"@avvy/contracts/ReverseResolverRegistryInterface.sol\";\nimport \"@avvy/contracts/reverse-resolvers/EVMReverseResolverInterface.sol\";\n      \ncontract ReverseResolvableContract {\n  ContractRegistryInterface public immutable _contractRegistry;\n  uint256 constant EVM_STANDARD_KEY = 3;\n      \n  /**\n   * WARNING\n   *\n   * DO NOT LEAVE THIS PUBLIC!\n   *\n   * Anyone who can call this method can set the reverse record for your\n   * domain. Make sure you properly authenticate the caller.\n   */\n  function setEVMReverse(uint256 name, uint256[] calldata path) public {\n    ReverseResolverRegistryInterface reverseResolverRegistry = ReverseResolverRegistryInterface(_contractRegistry.get('ReverseResolverRegistry'));\n    EVMReverseResolverInterface evmReverseResolver = EVMReverseResolverInterface(reverseResolverRegistry.getResolver(EVM_STANDARD_KEY));\n    evmReverseResolver.set(name, path);\n  }   \n      \n  constructor(ContractRegistryInterface contractRegistry) {\n    _contractRegistry = contractRegistry;\n  }   \n}     \n"
+    },
+    "contracts/ReverseResolverAuthenticator.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity ^0.8.0;\n\nimport \"@avvy/contracts/ReverseResolverAuthenticatorInterface.sol\";\n\ncontract ReverseResolverAuthenticator is ReverseResolverAuthenticatorInterface {\n\n  /**\n  * WARNING\n  * \n  * Make sure you write your own logic to authenticate the sender. If you return\n  * true, the sender is able to write records to your domain name at the\n  * provided name & path.\n  */\n  function canWrite(uint256 /* name */, uint256[] memory /* path */, address /* sender */) external pure override returns (bool) {\n    return true;\n  }   \n}     \n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
